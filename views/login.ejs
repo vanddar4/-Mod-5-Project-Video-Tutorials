@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<!-- Header -->
+<%- include('layouts/header'); -%>
+
+<body>
+    <div class="container">
+        <!-- Navigation -->
+        <%- include('layouts/navbarlogout'); -%>
+
+        <!--<section class="notifications">
+            <p class="notification-message">Message...</p>
+        </section>-->
+
+        <main>
+            <form class="text-center border border-light p-5" action="/users/login" method="POST">
+                <div class="form-group">
+                    <label for="username">Username</label>
+                    <input type="text" class="form-control" placeholder="Username" name="username" value="">
+                </div>
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" class="form-control" placeholder="Password" name="password" value="">
+                </div>
+            
+                <button type="submit" class="btn btn-primary">Login</button>
+            </form>
+        </main>
+
+  <!-- Footer -->
+  <%- include('layouts/footer'); -%>
+
+  <!-- Scripts -->
+  <%- include('layouts/scripts'); -%>
+
+    </div>
+</body>
+
+</html>

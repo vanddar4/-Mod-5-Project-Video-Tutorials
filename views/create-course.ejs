@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<!-- Header -->
+<%- include('layouts/header'); -%>
+
+<body>
+    <div class="container">
+        <!-- Navigation -->
+        <%- include('layouts/navbarlogin'); -%>
+
+        <!--<section class="notifications">
+            <p class="notification-message">Message...</p>
+        </section>-->
+
+        <main>
+            <form class="text-center border border-light p-5" action="/course/store" method="POST" enctype="multipart/form-data">
+                <h1>Create Course</h1>
+                <div class="form-group">
+                    <label for="title">Course Title</label>
+                    <input type="text" class="form-control" placeholder="Course name" name="title" id="title" value="">
+                </div>
+            <div class="form-group">
+                <label for="description">Course Description</label>
+                <textarea class="form-control" placeholder="Description" name="description" id="description"></textarea>
+            </div>
+            <div class="form-group">
+                <label for="imageUrl">Image url</label>
+                <input type="file" class="form-control" placeholder="Image Url" name="imageUrl" value="">
+            </div>
+            <div class="form-check">
+                <input type="checkbox" class="form-check-input" id="check-box" name="isPublic">
+                <label class="form-check-label" for="check-box">Public</label>
+            </div>
+                <button type="submit" class="btn btn-primary" id="sendMessageButton">Submit</button>
+            </form>
+        </main>
+
+  <!-- Footer -->
+  <%- include('layouts/footer'); -%>
+
+  <!-- Scripts -->
+  <%- include('layouts/scripts'); -%>
+
+    </div>
+</body>
+
+</html>
