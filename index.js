@@ -18,6 +18,7 @@ const Users = require("./models/users");
 
 //EJS
 const ejs = require('ejs');
+const ejsLint = require('ejs-lint');
 
 //BCrypt
 const bcrypt = require("bcrypt");
@@ -82,11 +83,17 @@ app.get('/', async (req, res)=>{
             username: req.session.user.username
         });
     } else {
-        res.redirect("guest-home")
+        const courses = await Courses.find({})
+        res.render("guest-home", {
+            courses
+        });
     }
 })
-app.get('/guest-home',(req, res)=>{
-    res.render('guest-home')
+app.get('/guest-home',async (req, res)=>{
+    const courses = await Courses.find({})
+        res.render("guest-home", {
+            courses
+    });
 })
 app.get('/register',(req, res)=>{
     res.render('register')
@@ -95,18 +102,18 @@ app.get('/login',(req, res)=>{
     res.render('login')
 })
 app.get('/user-home',(req, res)=>{
-    res.render('user-home')
+    res.redirect('/')
 })
+
 app.get('/create-course',(req, res)=>{
     if(req.session.user) {
         res.render("create-course", {
-         username: req.session.user.username,
+        username: req.session.user.username,
         })
     } else {
         res.redirect("guest-home")
     }
 })
-
 app.get('/course-details',(req, res)=>{
     if(req.secret.user) {
         res.render("course-details")
@@ -126,8 +133,41 @@ app.get('/course-details/:id',async (req,res)=>{
     }
 })
 app.get('/edit-course',(req, res)=>{
-    res.render('edit-course')
+    res.render("edit-course")
 })
+// app.get('/edit-course/:id', async (req,res) => {
+//     if(req.session.user) {       
+//         const courseEdit = await Courses.findById(req.params.id)
+//         res.render('edit-course',{
+//             courseEdit
+//         });    
+//     } else {
+//         res.redirect("guest-home")
+//     }    
+// })
+app.post('/edit-course/:id',(req, res)=>{
+    const { title, description, isPublic, image } = req.body;
+    Courses.findByIdAndUpdate({
+        title: title,
+        description: description,
+        image: image,
+        isPublic: isPublic,
+        creatorID: {
+            type: Schema.Types.ObjectId,
+            ref: "courses",
+        }
+    }, (error, course) =>{
+        console.log(error, course);
+        res.redirect("/user-home")
+    }) 
+});
+app.get("/course-details/:id",(req,res)=>{
+    const {_id} = req.body;
+    Courses.findByIdAndDelete({_id}, (error, course) =>{
+        console.log(error, course);
+        res.redirect("/user-home")
+    }) 
+});
 
 //POST Routes
 app.post("/users/register", (req, res) => {
@@ -142,7 +182,7 @@ app.post("/users/register", (req, res) => {
 // //Course Validation, needs to notify.js
 // [
 //     check("username").notEmpty().isString().trim().isLength(5).withMessage('Username must be 5 characters, letters and digits only'),
-//     check("password").notEmpty().isString().trim().isLength(5).withMessage('Username must be 5 characters, letters and digits only'),
+//     check("password").notEmpty().isString().trim().isLength(5).withMessage('Password must be 5 characters, letters and digits only'),
 // ],
 
 app.post("/users/login", (req, res) => {
@@ -168,11 +208,11 @@ app.post("/users/login", (req, res) => {
 // //Course Validation, needs to notify.js
 // [
 //     check("username").notEmpty().isString().trim().isLength(5).withMessage('Username must be 5 characters, letters and digits only'),
-//     check("password").notEmpty().isString().trim().isLength(5).withMessage('Username must be 5 characters, letters and digits only'),
+//     check("password").notEmpty().isString().trim().isLength(5).withMessage('Password must be 5 characters, letters and digits only'),
 //     check("repeatPassword").notEmpty().isString().trim().isSameAs("password").withMessage('Needs to start with http or https),
 // ],
 app.post("/course/store", async (req, res) => {
-    let image = req.files.image;
+    let image = req.files.imageUrl;
     image.mv(path.resolve(__dirname, "public/img", image.name), async (error) => {
          await Courses.create({
             ...req.body,
@@ -188,6 +228,7 @@ app.post("/course/store", async (req, res) => {
 //     check("description").notEmpty().isString().trim().isLength(20).withMessage('Description must be 20 characters'),
 //     check("imageUrl").notEmpty().isString().trim().startsWith(http || https).withMessage('Needs to start with http or https),
 // ],
+
 
 app.get("/auth/logout", logoutController);
 app.use((req, res) => res.render("notfound"));
