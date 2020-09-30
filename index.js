@@ -15,6 +15,7 @@ const logoutController = require("./controllers/logout")
 const mongoose = require('mongoose');
 const Courses = require("./models/courses");
 const Users = require("./models/users");
+//const notify = require("./notification.js");
 
 //EJS
 const ejs = require('ejs');
@@ -29,7 +30,6 @@ const bodyParser = require('body-parser');
 // WebToken
 const jwt = require('jsonwebtoken');
 const cookieParser = require("cookie-parser");
-
 
 //Server
 app.listen(port, ()=>{
@@ -132,50 +132,22 @@ app.get('/course-details/:id',async (req,res)=>{
         res.redirect("guest-home")
     }
 })
-app.get('/edit-course',(req, res)=>{
-    res.render("edit-course")
+
+app.get('/edit/:id', (req, res) => {
+    Courses.findById(req.params.id, (error, courseDetails) => {
+        res.render('edit-course', {username: req.session.user.username, courseDetails})
+    })
 })
-// app.get('/edit-course/:id', async (req,res) => {
-//     if(req.session.user) {       
-//         const courseEdit = await Courses.findById(req.params.id)
-//         res.render('edit-course',{
-//             courseEdit
-//         });    
-//     } else {
-//         res.redirect("guest-home")
-//     }    
-// })
-app.post('/edit-course/:id',(req, res)=>{
-    const { title, description, isPublic, image } = req.body;
-    Courses.findByIdAndUpdate({
-        title: title,
-        description: description,
-        image: image,
-        isPublic: isPublic,
-        creatorID: {
-            type: Schema.Types.ObjectId,
-            ref: "courses",
-        }
-    }, (error, course) =>{
-        console.log(error, course);
-        res.redirect("/user-home")
-    }) 
-});
-app.get("/course-details/:id",(req,res)=>{
-    const {_id} = req.body;
-    Courses.findByIdAndDelete({_id}, (error, course) =>{
-        console.log(error, course);
-        res.redirect("/user-home")
-    }) 
-});
 
 //POST Routes
 app.post("/users/register", (req, res) => {
     Users.create(req.body, (error, user) => {
         if(error) {
             return res.redirect("/guest-home")
+            //notify('There was an error. Please try again.', 'error', context)
         } else {
             res.redirect("/login");
+            //notify('Successful Registration', 'success', context)
         }
     })
 })
@@ -192,14 +164,17 @@ app.post("/users/login", (req, res) => {
             bcrypt.compare(password, user.password, (error, same) => {
                 if(same) {
                     req.session.user = user
+                    //notify('Successful Login', 'success', context)
                     res.redirect("/")
                 }
                 else {
+                    //notify('There was an error. Please try again.', 'error', context)
                     res.redirect("/login")
                 }
             })
         }
         else {
+            //notify('Please try again', 'error', context)
             res.redirect("/login")
         }
     })
@@ -214,11 +189,12 @@ app.post("/users/login", (req, res) => {
 app.post("/course/store", async (req, res) => {
     let image = req.files.imageUrl;
     image.mv(path.resolve(__dirname, "public/img", image.name), async (error) => {
-         await Courses.create({
+        await Courses.create({
             ...req.body,
             image:"/img/" + image.name,
             creatorID: req.session.user._id
             })
+        //notify('Successfully Created Course', 'success', context)
         res.redirect("/")
     })
 })
@@ -228,7 +204,29 @@ app.post("/course/store", async (req, res) => {
 //     check("description").notEmpty().isString().trim().isLength(20).withMessage('Description must be 20 characters'),
 //     check("imageUrl").notEmpty().isString().trim().startsWith(http || https).withMessage('Needs to start with http or https),
 // ],
+app.post('/edit/:id',(req, res) => {
+    Courses.findByIdAndUpdate(req.params.id, req.body, (error,courseDetails) => {
+            if(error) throw error
+            else res.redirect('/user-home')
+            //notify('Successfully Edited Course', 'success', context)
 
+    })
+});
+// //Course Validation, needs to notify.js
+// [
+//     check("title").notEmpty().isString().trim().isLength(4).withMessage('Title must be 4 characters'),
+//     check("description").notEmpty().isString().trim().isLength(20).withMessage('Description must be 20 characters'),
+//     check("imageUrl").notEmpty().isString().trim().startsWith(http || https).withMessage('Needs to start with http or https),
+// ],
+
+app.get('/delete/:id', async (req, res)=>{
+    console.log(req.params.id);
+    await Courses.findByIdAndDelete(req.params.id, (error) => {
+        if(error) throw error
+        else res.redirect('/user-home')
+        //notify('Successfully Deleted Course', 'success', context)
+    }) 
+})
 
 app.get("/auth/logout", logoutController);
 app.use((req, res) => res.render("notfound"));

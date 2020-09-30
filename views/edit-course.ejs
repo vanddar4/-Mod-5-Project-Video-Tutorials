@@ -10,7 +10,7 @@
         <%- include('layouts/navbarlogin'); -%>
 
         <main>
-            <form class="text-center border border-light p-5" action="/edit-course/<% courseDetails._id %>" method="POST" enctype="multipart/form-data">
+            <form class="text-center border border-light p-5" action="/edit/<%= courseDetails._id %>" method="POST" enctype="multipart/form-data">
                 <h1>Edit Course</h1>
                     <div class="form-group">
                         <label for="title"><%= courseDetails.title %></label>
@@ -22,7 +22,7 @@
                     </div>
                     <div class="form-group">
                         <label for="imageUrl">Image url</label>
-                        <input type="text" class="form-control" placeholder="Image Url" value="<%= courseDetails.imageUrl %>" name="imageUrl">
+                        <input type="text" class="form-control" placeholder="Image Url" value="<%= courseDetails.image %>" name="imageUrl">
                     </div>
                     <div class="form-check">
                         <input type="checkbox" class="form-check-input" id="check-box" name="isPublic">

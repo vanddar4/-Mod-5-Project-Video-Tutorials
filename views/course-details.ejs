@@ -26,11 +26,14 @@
                         <h3 class="my-3">Course Description</h3>
                         <p><%= courseDetails.description %></p>
 
-                        <a class="btn btn-danger" action="/delete/<% courseDetails._id %>" method="Delete"> Delete</a>
-                        <a class="btn btn-warning" href="/edit/<% courseDetails._id %>" >Edit</a>
-                        <!--<span class="enrolled-span">You are already enrolled</span>
+                        <a class="btn btn-danger" href="/delete/<%= courseDetails._id %>" > Delete</a>
+                        <a class="btn btn-warning" href="/edit/:<%= courseDetails._id %>" >Edit</a>
+                        <% if (!courseDetails._id) { %> 
                         <a class="btn btn-primary" href="/">Enroll</a>
-                        -->
+                        <% } %> 
+                        <% if (courseDetails._id) { %> 
+                        <span class="enrolled-span">You are already enrolled</span>
+                        <% } %> 
                     </div>
                 </div>
             </div>
